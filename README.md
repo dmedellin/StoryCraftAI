@@ -24,7 +24,7 @@ To get started with StoryCraftAI, follow these steps:
 1. **Clone the Repository**
 
     ```bash
-    git clone https://github.com/yourusername/StoryCraftAI.git
+    git clone https://github.com/dmedellin/StoryCraftAI.git
     cd StoryCraftAI
     ```
 
