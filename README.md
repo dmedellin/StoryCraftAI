@@ -30,6 +30,8 @@ To get started with StoryCraftAI, follow these steps:
 
 2. **Install Dependencies**
 
+
+Pending
     ```bash
     # Assuming this is a Node.js project
     npm install
