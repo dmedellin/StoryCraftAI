@@ -15,6 +15,5 @@
             }
         }
     },
-    "forwardPorts": [],
-    "remoteUser": "vscode"
+    "forwardPorts": []
 }
