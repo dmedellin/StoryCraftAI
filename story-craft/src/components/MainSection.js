@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Container from '@mui/material/Container';
+import TextField from '@mui/material/TextField';
 import WorkItemList from './WorkItemList';
 
 const workItems = [
@@ -38,9 +39,23 @@ const workItems = [
 ];
 
 function MainSection() {
+  const [filter, setFilter] = useState('');
+
+  const filteredItems = workItems.filter((item) =>
+    item.Title.toLowerCase().includes(filter.toLowerCase())
+  );
+
   return (
     <Container style={{ marginTop: '20px' }}>
-       <WorkItemList items={workItems} />
+      <TextField
+        fullWidth
+        label="Filter by Title"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        variant="outlined"
+        style={{ marginBottom: '20px' }}
+      />
+      <WorkItemList items={filteredItems} />
     </Container>
   );
 }

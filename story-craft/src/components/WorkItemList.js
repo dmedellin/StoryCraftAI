@@ -4,8 +4,8 @@ import WorkItem from './WorkItem';
 function WorkItemList({ items }) {
   return (
     <div>
-      {items.map((item, index) => (
-        <WorkItem key={index} item={item} />
+      {items.map((item) => (
+        <WorkItem key={item.Title} item={item} />
       ))}
     </div>
   );
