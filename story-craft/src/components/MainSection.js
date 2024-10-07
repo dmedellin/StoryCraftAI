@@ -1,52 +1,57 @@
 import React, { useState } from 'react';
 import Container from '@mui/material/Container';
 import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
 import WorkItemList from './WorkItemList';
-
-const workItems = [
-  {
-    "WorkItemType": "Epic",
-    "Title": "User Management",
-    "Description": "Implement user registration and authentication system to handle user onboarding and security.",
-    "Parent": null,
-    "StoryPoints": null,
-    "RemainingWork": null
-  },
-  {
-    "WorkItemType": "Feature",
-    "Title": "Azure App Registration",
-    "Description": "Set up Azure App Registration to support secure user authentication, including OAuth and social logins.",
-    "Parent": "User Management",
-    "StoryPoints": null,
-    "RemainingWork": null
-  },
-  {
-    "WorkItemType": "User Story",
-    "Title": "Implement social login",
-    "Description": "As a user, I want to be able to register and log in using my social media accounts so that I can access the application more easily.",
-    "Parent": "Azure App Registration",
-    "StoryPoints": 5,
-    "RemainingWork": null
-  },
-  {
-    "WorkItemType": "Task",
-    "Title": "Configure Azure App Registration",
-    "Description": "Set up the Azure App Registration portal to handle OAuth configuration for social login integration.",
-    "Parent": "Implement social login",
-    "StoryPoints": null,
-    "RemainingWork": 4
-  }
-];
 
 function MainSection() {
   const [filter, setFilter] = useState('');
+  const [workItems, setWorkItems] = useState([]);
 
-  const filteredItems = workItems.filter((item) =>
-    item.Title.toLowerCase().includes(filter.toLowerCase())
-  );
+  // Handle file upload
+  const handleUpload = (e) => {
+    const fileReader = new FileReader();
+    fileReader.onload = (event) => {
+      const json = JSON.parse(event.target.result);
+      setWorkItems(json);
+    };
+    fileReader.readAsText(e.target.files[0]);
+  };
+
+  // Handle JSON download
+  const handleDownload = () => {
+    const dataStr = JSON.stringify(workItems, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'workItems.json';
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Update a work item
+  const updateWorkItem = (updatedItem) => {
+    const updateItems = (items) =>
+      items.map((item) =>
+        item.Title === updatedItem.Title
+          ? updatedItem
+          : { ...item, children: updateItems(item.children || []) }
+      );
+    setWorkItems(updateItems(workItems));
+  };
 
   return (
     <Container style={{ marginTop: '20px' }}>
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+        <Button variant="contained" component="label">
+          Upload JSON
+          <input type="file" hidden accept=".json" onChange={handleUpload} />
+        </Button>
+        <Button variant="contained" onClick={handleDownload}>
+          Download JSON
+        </Button>
+      </div>
       <TextField
         fullWidth
         label="Filter by Title"
@@ -55,7 +60,11 @@ function MainSection() {
         variant="outlined"
         style={{ marginBottom: '20px' }}
       />
-      <WorkItemList items={filteredItems} />
+      <WorkItemList
+        items={workItems}
+        filter={filter}
+        updateWorkItem={updateWorkItem}
+      />
     </Container>
   );
 }

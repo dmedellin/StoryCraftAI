@@ -1,0 +1,117 @@
+[
+  {
+    "WorkItemType": "Epic",
+    "Title": "User Management",
+    "Description": "Implement user registration and authentication",
+    "Parent": null,
+    "StoryPoints": null,
+    "RemainingWork": null,
+    "children": [
+      {
+        "WorkItemType": "Feature",
+        "Title": "Azure App Registration",
+        "Description": "Set up Azure App Registration for user management",
+        "Parent": "User Management",
+        "StoryPoints": null,
+        "RemainingWork": null,
+        "children": [
+          {
+            "WorkItemType": "User Story",
+            "Title": "Implement social login",
+            "Description": "As a user, I can register and login using my social account",
+            "Parent": "Azure App Registration",
+            "StoryPoints": 5,
+            "RemainingWork": null,
+            "children": [
+              {
+                "WorkItemType": "Task",
+                "Title": "Configure Azure App Registration",
+                "Description": "Set up app registration in Azure portal",
+                "Parent": "Implement social login",
+                "StoryPoints": null,
+                "RemainingWork": 4,
+                "children": []
+              },
+              {
+                "WorkItemType": "Task",
+                "Title": "Develop OAuth flow",
+                "Description": "Implement OAuth authentication flow in backend",
+                "Parent": "Implement social login",
+                "StoryPoints": null,
+                "RemainingWork": 6,
+                "children": []
+              }
+            ]
+          },
+          {
+            "WorkItemType": "User Story",
+            "Title": "Secure user authentication",
+            "Description": "As a user, I can securely authenticate to the application",
+            "Parent": "Azure App Registration",
+            "StoryPoints": 3,
+            "RemainingWork": null,
+            "children": [
+              {
+                "WorkItemType": "Task",
+                "Title": "Implement MFA",
+                "Description": "Add multi-factor authentication for enhanced security",
+                "Parent": "Secure user authentication",
+                "StoryPoints": null,
+                "RemainingWork": 5,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "WorkItemType": "Epic",
+    "Title": "Backend Development",
+    "Description": "Develop backend services for the application",
+    "Parent": null,
+    "StoryPoints": null,
+    "RemainingWork": null,
+    "children": [
+      {
+        "WorkItemType": "Feature",
+        "Title": "Token Management",
+        "Description": "Handle temp and user tokens securely",
+        "Parent": "Backend Development",
+        "StoryPoints": null,
+        "RemainingWork": null,
+        "children": [
+          {
+            "WorkItemType": "User Story",
+            "Title": "Exchange temp token for user token",
+            "Description": "As a system, I can exchange a temp token for a user token",
+            "Parent": "Token Management",
+            "StoryPoints": 5,
+            "RemainingWork": null,
+            "children": [
+              {
+                "WorkItemType": "Task",
+                "Title": "Develop token exchange API",
+                "Description": "Create API endpoint to exchange tokens",
+                "Parent": "Exchange temp token for user token",
+                "StoryPoints": null,
+                "RemainingWork": 6,
+                "children": []
+              },
+              {
+                "WorkItemType": "Task",
+                "Title": "Store tokens securely",
+                "Description": "Implement secure storage for user tokens",
+                "Parent": "Exchange temp token for user token",
+                "StoryPoints": null,
+                "RemainingWork": 5,
+                "children": []
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
