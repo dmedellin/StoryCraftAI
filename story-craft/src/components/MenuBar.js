@@ -8,7 +8,7 @@ function MenuBar() {
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6">
-          My Application
+          Story-CraftAI
         </Typography>
       </Toolbar>
     </AppBar>
