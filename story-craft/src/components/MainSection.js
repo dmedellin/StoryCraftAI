@@ -7,18 +7,31 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 import axios from 'axios';
 
 function MainSection() {
   const [filter, setFilter] = useState('');
   const [workItems, setWorkItems] = useState([]);
 
-  // New state variables for the dialog and inputs
-  const [openDialog, setOpenDialog] = useState(false);
+  // State variables for the push to Azure DevOps dialog
+  const [openPushDialog, setOpenPushDialog] = useState(false);
   const [pat, setPat] = useState('');
   const [organization, setOrganization] = useState('');
   const [project, setProject] = useState('');
   const [isPushing, setIsPushing] = useState(false);
+
+  // State variables for the OpenAI generation dialog
+  const [openAIDialog, setOpenAIDialog] = useState(false);
+  const [useAzureOpenAI, setUseAzureOpenAI] = useState(false);
+  const [openAIKey, setOpenAIKey] = useState('');
+  const [workloadDescription, setWorkloadDescription] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  // Additional Azure OpenAI fields
+  const [azureResourceName, setAzureResourceName] = useState('');
+  const [azureDeploymentName, setAzureDeploymentName] = useState('');
+  const [azureAPIVersion, setAzureAPIVersion] = useState('2023-03-15-preview'); // adjust as needed
 
   // Handle file upload
   const handleUpload = (e) => {
@@ -53,20 +66,21 @@ function MainSection() {
     setWorkItems(updateItems(workItems));
   };
 
-  // Handle opening the dialog
-  const handleOpenDialog = () => {
-    setOpenDialog(true);
+  // Functions for the push to Azure DevOps dialog
+  const handleOpenPushDialog = () => {
+    setOpenPushDialog(true);
   };
 
-  // Handle closing the dialog
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
+  const handleClosePushDialog = () => {
+    setOpenPushDialog(false);
   };
 
   // Function to push a work item to Azure DevOps
   const pushWorkItem = async (workItem, parentId = null) => {
-    // Corrected URL with '$' before the work item type
-    const workItemType = workItem.WorkItemType.toLowerCase() === 'user story' ? 'User%20Story' : workItem.WorkItemType;
+    const workItemType =
+      workItem.WorkItemType.toLowerCase() === 'user story'
+        ? 'User%20Story'
+        : workItem.WorkItemType;
     const url = `https://dev.azure.com/${organization}/${project}/_apis/wit/workitems/$${workItemType}?api-version=7.0`;
 
     const headers = {
@@ -79,7 +93,6 @@ function MainSection() {
       { op: 'add', path: '/fields/System.Description', value: workItem.Description || '' },
     ];
 
-    // Add Story Points if applicable
     if (workItem.StoryPoints !== undefined && workItem.StoryPoints !== null) {
       body.push({
         op: 'add',
@@ -88,7 +101,6 @@ function MainSection() {
       });
     }
 
-    // Add Remaining Work if applicable
     if (workItem.RemainingWork !== undefined && workItem.RemainingWork !== null) {
       body.push({
         op: 'add',
@@ -97,7 +109,6 @@ function MainSection() {
       });
     }
 
-    // Link to parent if parentId is provided
     if (parentId) {
       body.push({
         op: 'add',
@@ -114,19 +125,21 @@ function MainSection() {
       const createdWorkItemId = response.data.id;
       console.log(`Successfully pushed work item: ${workItem.Title} (ID: ${createdWorkItemId})`);
 
-      // Recursively push child work items if any
       if (workItem.children && workItem.children.length > 0) {
         for (const childItem of workItem.children) {
           await pushWorkItem(childItem, createdWorkItemId);
         }
       }
     } catch (error) {
-      console.error(`Failed to push work item: ${workItem.Title}`, error.response?.data || error.message);
+      console.error(
+        `Failed to push work item: ${workItem.Title}`,
+        error.response?.data || error.message
+      );
     }
   };
 
-  // Handle submitting the dialog
-  const handleSubmit = async () => {
+  // Handle submitting the push to Azure DevOps dialog
+  const handleSubmitPush = async () => {
     if (!pat || !organization || !project) {
       alert('Please fill in all required fields.');
       return;
@@ -137,7 +150,117 @@ function MainSection() {
       await pushWorkItem(workItem);
     }
     setIsPushing(false);
-    setOpenDialog(false);
+    setOpenPushDialog(false);
+  };
+
+  // Functions for the OpenAI generation dialog
+  const handleOpenAIDialog = () => {
+    setOpenAIDialog(true);
+  };
+
+  const handleCloseAIDialog = () => {
+    setOpenAIDialog(false);
+  };
+
+  const handleGenerate = async () => {
+    if (!openAIKey || !workloadDescription) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    if (useAzureOpenAI && (!azureResourceName || !azureDeploymentName || !azureAPIVersion)) {
+      alert('Please fill in all Azure OpenAI fields.');
+      return;
+    }
+
+    setIsGenerating(true);
+
+    const prompt = `
+Generate a JSON structure representing epics, features, user stories, and tasks based on the following description:
+
+"${workloadDescription}"
+
+The JSON should follow this schema:
+[
+  {
+    "WorkItemType": "Epic",
+    "Title": "Epic Title",
+    "Description": "Epic Description",
+    "children": [
+      {
+        "WorkItemType": "Feature",
+        "Title": "Feature Title",
+        "Description": "Feature Description",
+        "children": [
+          {
+            "WorkItemType": "User Story",
+            "Title": "User Story Title",
+            "Description": "User Story Description",
+            "StoryPoints": Number,
+            "children": [
+              {
+                "WorkItemType": "Task",
+                "Title": "Task Title",
+                "Description": "Task Description",
+                "RemainingWork": Number
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
+
+Ensure the output is valid JSON and matches the schema exactly.
+    `;
+
+    try {
+      let response;
+      if (useAzureOpenAI) {
+        // Use Azure OpenAI endpoint
+        const url = `https://${azureResourceName}.openai.azure.com/openai/deployments/${azureDeploymentName}/chat/completions?api-version=${azureAPIVersion}`;
+        response = await axios.post(
+          url,
+          {
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 2048,
+            temperature: 0.7,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'api-key': openAIKey,
+            },
+          }
+        );
+      } else {
+        // Use OpenAI endpoint
+        response = await axios.post(
+          'https://api.openai.com/v1/chat/completions',
+          {
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: prompt }],
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${openAIKey}`,
+            },
+          }
+        );
+      }
+
+      const aiOutput = response.data.choices[0].message.content.trim();
+      const generatedWorkItems = JSON.parse(aiOutput);
+      setWorkItems(generatedWorkItems);
+      setIsGenerating(false);
+      setOpenAIDialog(false);
+    } catch (error) {
+      console.error('Error generating work items:', error);
+      alert('Failed to generate work items. Please check your API key and inputs, and try again.');
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -150,7 +273,10 @@ function MainSection() {
         <Button variant="contained" onClick={handleDownload}>
           Download JSON
         </Button>
-        <Button variant="contained" onClick={handleOpenDialog} disabled={isPushing}>
+        <Button variant="contained" onClick={handleOpenAIDialog} disabled={isGenerating}>
+          {isGenerating ? 'Generating...' : 'Generate with AI'}
+        </Button>
+        <Button variant="contained" onClick={handleOpenPushDialog} disabled={isPushing}>
           {isPushing ? 'Pushing...' : 'Push to Azure DevOps'}
         </Button>
       </div>
@@ -168,8 +294,78 @@ function MainSection() {
         updateWorkItem={updateWorkItem}
       />
 
+      {/* Dialog for OpenAI API key and workload description */}
+      <Dialog open={openAIDialog} onClose={handleCloseAIDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>Generate Work Items with AI</DialogTitle>
+        <DialogContent>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={useAzureOpenAI}
+                onChange={(e) => setUseAzureOpenAI(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Use Azure OpenAI"
+          />
+          <TextField
+            autoFocus
+            margin="dense"
+            label="API Key"
+            type="password"
+            fullWidth
+            value={openAIKey}
+            onChange={(e) => setOpenAIKey(e.target.value)}
+          />
+          {useAzureOpenAI && (
+            <>
+              <TextField
+                margin="dense"
+                label="Azure Resource Name"
+                type="text"
+                fullWidth
+                value={azureResourceName}
+                onChange={(e) => setAzureResourceName(e.target.value)}
+              />
+              <TextField
+                margin="dense"
+                label="Azure Deployment Name"
+                type="text"
+                fullWidth
+                value={azureDeploymentName}
+                onChange={(e) => setAzureDeploymentName(e.target.value)}
+              />
+              <TextField
+                margin="dense"
+                label="Azure API Version"
+                type="text"
+                fullWidth
+                value={azureAPIVersion}
+                onChange={(e) => setAzureAPIVersion(e.target.value)}
+              />
+            </>
+          )}
+          <TextField
+            margin="dense"
+            label="Workload Description"
+            type="text"
+            fullWidth
+            multiline
+            rows={4}
+            value={workloadDescription}
+            onChange={(e) => setWorkloadDescription(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseAIDialog} disabled={isGenerating}>Cancel</Button>
+          <Button onClick={handleGenerate} variant="contained" color="primary" disabled={isGenerating}>
+            {isGenerating ? 'Generating...' : 'Generate'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Dialog for Azure DevOps inputs */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
+      <Dialog open={openPushDialog} onClose={handleClosePushDialog}>
         <DialogTitle>Push to Azure DevOps</DialogTitle>
         <DialogContent>
           <TextField
@@ -199,8 +395,8 @@ function MainSection() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} disabled={isPushing}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained" color="primary" disabled={isPushing}>
+          <Button onClick={handleClosePushDialog} disabled={isPushing}>Cancel</Button>
+          <Button onClick={handleSubmitPush} variant="contained" color="primary" disabled={isPushing}>
             {isPushing ? 'Pushing...' : 'Push'}
           </Button>
         </DialogActions>
