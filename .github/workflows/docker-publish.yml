@@ -31,12 +31,10 @@ jobs:
     - name: Build the Docker image
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/story-craft:latest \
-                     -t ${{ secrets.DOCKER_USERNAME }}/story-craft:${{ env.DOCKER_TAG_SHA }} \
                      -t ${{ secrets.DOCKER_USERNAME }}/story-craft:${{ env.DOCKER_TAG_RUN_ID }} story-craft
 
     # Push all Docker image tags to DockerHub
     - name: Push Docker image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/story-craft:latest
-        docker push ${{ secrets.DOCKER_USERNAME }}/story-craft:${{ env.DOCKER_TAG_SHA }}
         docker push ${{ secrets.DOCKER_USERNAME }}/story-craft:${{ env.DOCKER_TAG_RUN_ID }}
