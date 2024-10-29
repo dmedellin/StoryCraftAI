@@ -109,6 +109,14 @@ function MainSection() {
       });
     }
 
+    if (workItem.AcceptanceCriteria) {
+      body.push({
+        op: 'add',
+        path: '/fields/Microsoft.VSTS.Common.AcceptanceCriteria',
+        value: workItem.AcceptanceCriteria,
+      });
+    }
+
     if (parentId) {
       body.push({
         op: 'add',
@@ -191,11 +199,13 @@ The JSON should follow this schema:
         "WorkItemType": "Feature",
         "Title": "Feature Title",
         "Description": "Feature Description",
+        "AcceptanceCriteria": "Acceptance criteria for the feature.",
         "children": [
           {
             "WorkItemType": "User Story",
             "Title": "User Story Title",
             "Description": "User Story Description",
+            "AcceptanceCriteria": "Acceptance criteria for the user story.",
             "StoryPoints": Number,
             "children": [
               {
@@ -213,7 +223,8 @@ The JSON should follow this schema:
 ]
 
 Ensure the output is valid JSON and matches the schema exactly.
-    `;
+`;
+
 
     try {
       let response;
