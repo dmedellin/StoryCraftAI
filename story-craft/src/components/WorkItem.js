@@ -81,6 +81,23 @@ function WorkItem({ item, level, filter, updateWorkItem }) {
               />
             </Box>
 
+            {/* Conditionally render Acceptance Criteria for User Story and Feature */}
+            {['User Story', 'Feature'].includes(item.WorkItemType) && (
+              <Box marginBottom={2}>
+                <TextField
+                  fullWidth
+                  label="Acceptance Criteria"
+                  value={item.AcceptanceCriteria || ''}
+                  onChange={(e) =>
+                    handleChange('AcceptanceCriteria', e.target.value)
+                  }
+                  variant="outlined"
+                  multiline
+                  rows={3}
+                />
+              </Box>
+            )}
+
             <Box marginBottom={2}>
               <TextField
                 fullWidth
