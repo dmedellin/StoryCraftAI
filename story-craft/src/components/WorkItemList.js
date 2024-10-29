@@ -1,23 +1,13 @@
 import React from 'react';
 import List from '@mui/material/List';
-import WorkItem from './WorkItem';
+import WorkItem from './WorkItem';  // Assuming a WorkItem component exists
 
-function WorkItemList({ items, filter, updateWorkItem, level = 0 }) {
+function WorkItemList({ items, updateWorkItem }) {
   return (
     <List>
-      {items
-        .filter((item) =>
-          item.Title.toLowerCase().includes(filter.toLowerCase())
-        )
-        .map((item) => (
-          <WorkItem
-            key={item.Title}
-            item={item}
-            level={level}
-            filter={filter}
-            updateWorkItem={updateWorkItem}
-          />
-        ))}
+      {items.map((item) => (
+        <WorkItem key={item.Title} item={item} updateWorkItem={updateWorkItem} />
+      ))}
     </List>
   );
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import MenuBar from './components/MenuBar';
-import MainSection from './components/MainSection';
+import MainSection from './MainSection';
 
 function App() {
   return (
