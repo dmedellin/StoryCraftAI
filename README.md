@@ -30,19 +30,10 @@ To get started with StoryCraftAI, follow these steps:
 
 2. **Install Dependencies**
 
-
-Pending
+- Navigate to story-craft 
+- Run
     ```bash
-    # Assuming this is a Node.js project
     npm install
-    ```
-
-3. **Set Up Environment Variables**
-
-    Create a `.env` file in the root directory and add your API keys and other configuration details.
-
-    ```
-    AI_API_KEY=your_ai_service_api_key
     ```
 
 ## Usage
@@ -56,16 +47,6 @@ Pending
 2. **Access the UI**
 
     Open your web browser and go to `http://localhost:3000` to start generating and managing project stories.
-
-## Contributing
-
-Contributions are welcome! Please follow these steps to contribute:
-
-1. Fork the repository.
-2. Create a new branch: `git checkout -b feature/YourFeatureName`.
-3. Make your changes and commit them: `git commit -m 'Add some feature'`.
-4. Push to the branch: `git push origin feature/YourFeatureName`.
-5. Open a pull request.
 
 ## License
 
