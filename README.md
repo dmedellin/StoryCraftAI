@@ -48,6 +48,14 @@ To get started with StoryCraftAI, follow these steps:
 
     Open your web browser and go to `http://localhost:3000` to start generating and managing project stories.
 
+3. **Run with Docker**
+
+    Alternatively, you can run the application using Docker:
+
+    ```bash
+    docker run -d -p 3000:80 dmedellin/story-craft:latest
+    ```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
